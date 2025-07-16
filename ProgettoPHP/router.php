@@ -1,6 +1,12 @@
 <?php
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+$base = '/ProgettoPHP';
+if (strpos($uri, $base) === 0) {
+    $uri = substr($uri, strlen($base));
+    if ($uri === '') $uri = '/';
+}
+
 switch ($uri) {
     case '/home':
         $pagina = 'home.php';
@@ -8,7 +14,7 @@ switch ($uri) {
     case '/':
         $pagina = 'home.php';
         break;
-    case '/about':
+    case '/about.php':
         $pagina = 'about.php';
         break;
     default:
@@ -16,5 +22,5 @@ switch ($uri) {
         break;
 }
 
-include $pagina;
+include __DIR__ . '/' . $pagina;
 ?> 
