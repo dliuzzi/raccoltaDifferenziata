@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\HomeController;
+// Rimuovi o commenta la riga per HomeController se non lo usi più altrove
+// use App\Http\Controllers\HomeController;
+use App\Http\Controllers\WelcomeController; // AGGIUNGI questa riga per importare il nuovo controller
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [HomeController::class, 'index'])->name('homepage');
+// AGGIORNATO: La tua homepage ora punta al WelcomeController
+Route::get('/', [WelcomeController::class, 'index'])->name('homepage');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -16,7 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Route per la gestione dei servizi
+    // Route per la gestione dei servizi (puoi anche usare Route::resource('services', ServiceController::class); per concisione)
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index'); // Mostra tutti i servizi
     Route::get('/services/create', [ServiceController::class, 'create'])->name('services.create'); // Mostra il form per creare un servizio
     Route::post('/services', [ServiceController::class, 'store'])->name('services.store'); // Salva un nuovo servizio
