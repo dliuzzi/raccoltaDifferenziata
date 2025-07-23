@@ -15,13 +15,10 @@
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
 
-            {{-- Il tuo header personalizzato sostituisce la navigazione predefinita di Breeze --}}
+            {{-- Il tuo header personalizzato --}}
             <x-app-header />
 
-            {{-- Questo blocco può essere mantenuto se vuoi ancora una sezione per titoli di pagina sotto il tuo nuovo header.
-                Tuttavia, dato il nuovo design, potresti voler rimuovere completamente questo @isset($header)
-                e gestire i titoli direttamente nel tuo app-header o nelle singole pagine.
-                Per ora, lo lascio, ma considera di rimuoverlo se non ti serve più. --}}
+            {{-- Questo blocco è per i titoli delle pagine (come "Profile" nella pagina profilo di Breeze) --}}
             @isset($header)
                 <header class="bg-white dark:bg-gray-800 shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -31,8 +28,9 @@
             @endisset
 
             <main>
-                {{-- *** LA MODIFICA È QUI *** --}}
-                @yield('content')
+                {{-- *** CORREZIONE QUI: AGGIUNTO {{ $slot }} *** --}}
+                @yield('content') {{-- Per le pagine che usano @extends e @section('content') --}}
+                {{ $slot ?? '' }} {{-- Per le pagine che usano <x-app-layout> (come il profilo di Breeze) --}}
             </main>
         </div>
         <x-app-footer />

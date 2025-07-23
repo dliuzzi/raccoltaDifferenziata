@@ -1,6 +1,17 @@
 <header class="w-full">
     {{-- MODIFICATO QUI: Rimosso 'mb-px', aggiunto 'border-b' e 'border-blue-800' --}}
-    <div class="bg-blue-800 text-white px-4 flex justify-end items-stretch h-14 border-b border-blue-800" style="background-color: #0077B6;">
+    <div class="bg-blue-800 text-white px-4 flex justify-between items-stretch h-14 border-b border-blue-800" style="background-color: #0077B6;">
+        <div class="flex items-center h-full">
+            @auth
+                <a href="{{ route('profile.edit') }}" class="text-white font-semibold px-3 h-full flex items-center hover:underline">
+                    {{ Auth::user()->name }}
+                </a>
+            @else
+                <a href="{{ route('login') }}" class="text-white font-semibold px-3 h-full flex items-center hover:underline">
+                    Login
+                </a>
+            @endauth
+        </div>
         <ul class="flex space-x-6 text-sm">
             <li class="h-full flex items-center">
                 <a href="#" class="block h-full px-3 transition-colors duration-200 flex items-center justify-center"
