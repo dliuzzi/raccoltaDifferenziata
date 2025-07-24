@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\PageContentController;
 // Rimuovi o commenta la riga per HomeController se non lo usi più altrove
 // use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WelcomeController; // AGGIUNGI questa riga per importare il nuovo controller
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ArticleController;
+
+Route::get('/articles/{id}', [ArticleController::class, 'show'])->name('articles.show');
 
 // AGGIORNATO: La tua homepage ora punta al WelcomeController
 Route::get('/', [WelcomeController::class, 'index'])->name('homepage');
@@ -27,6 +31,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/services/{service}/edit', [ServiceController::class, 'edit'])->name('services.edit'); // Mostra il form per modificare un servizio
     Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update'); // Aggiorna un servizio esistente
     Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy'); // Elimina un servizio
+
+    Route::get('/raccolta-differenziata', [PageContentController::class, 'raccoltaDifferenziata'])->name('raccolta-differenziata');
+    Route::get('/ingombranti', [PageContentController::class, 'ingombranti'])->name('ingombranti');
+    Route::get('/porta-a-porta', [PageContentController::class, 'portaAPorta'])->name('porta-a-porta'); // <-- CAMBIA QUESTO: 'porta-a-porta' (URL) ma 'portaAPorta' (metodo)
 });
 
 require __DIR__.'/auth.php';

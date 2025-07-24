@@ -18,9 +18,31 @@ class ServiceController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request) // <-- MODIFICA QUI: Aggiunto Request $request
     {
-        return view('services.create');
+        $preselectedServiceType = '';
+
+        // Leggi il parametro 'type' dall'URL
+        $type = $request->query('type');
+
+        // Imposta il valore predefinito in base al parametro 'type'
+        switch ($type) {
+            case 'regolare':
+                $preselectedServiceType = 'Ritiro regolare dei rifiuti';
+                break;
+            case 'occasionale':
+                $preselectedServiceType = 'Ritiro occasionale di rifiuti e ingombranti';
+                break;
+            case 'premi':
+                $preselectedServiceType = 'Richiesta premi ecologici';
+                break;
+            default:
+                $preselectedServiceType = ''; // Nessuna pre-selezione se il parametro non è riconosciuto o assente
+                break;
+        }
+
+        // Passa la variabile alla vista
+        return view('services.create', compact('preselectedServiceType'));
     }
 
     /**
@@ -33,11 +55,12 @@ class ServiceController extends Controller
             'service_type' => 'required|string|max:255',
             'description' => 'nullable|string',
             'scheduled_at' => 'nullable|date',
-            'status' => 'nullable|string|max:255',
+            // 'status' => 'nullable|string|max:255', // Questo campo di solito è gestito dal backend per lo stato iniziale
         ]);
 
         // Crea un nuovo servizio associandolo all'utente autenticato
-        Auth::user()->services()->create($request->all());
+        // E imposta lo stato iniziale a 'pending' se non specificato altrove
+        Auth::user()->services()->create(array_merge($request->all(), ['status' => 'pending']));
 
         return redirect()->route('services.index')->with('success', 'Servizio richiesto con successo!');
     }
@@ -80,7 +103,7 @@ class ServiceController extends Controller
             'service_type' => 'required|string|max:255',
             'description' => 'nullable|string',
             'scheduled_at' => 'nullable|date',
-            'status' => 'nullable|string|max:255',
+            'status' => 'required|string|max:255', // Lo stato qui potrebbe essere richiesto per l'aggiornamento
         ]);
 
         $service->update($request->all());

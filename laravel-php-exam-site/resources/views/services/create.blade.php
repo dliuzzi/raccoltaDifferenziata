@@ -14,7 +14,9 @@
 
                         <div>
                             <x-input-label for="service_type" :value="__('Tipo di Servizio')" />
-                            <x-text-input id="service_type" class="block mt-1 w-full" type="text" name="service_type" :value="old('service_type')" required autofocus />
+                            {{-- MODIFICA QUI: Aggiunto l'attributo value per pre-popolare il campo --}}
+                            <x-text-input id="service_type" class="block mt-1 w-full" type="text" name="service_type"
+                                :value="old('service_type', $preselectedServiceType ?? '')" required autofocus />
                             <x-input-error :messages="$errors->get('service_type')" class="mt-2" />
                         </div>
 
@@ -30,20 +32,7 @@
                             <x-input-error :messages="$errors->get('scheduled_at')" class="mt-2" />
                         </div>
 
-                        {{-- Campo Stato (Status) - Commentato per ora.
-                             Normalmente, lo stato iniziale di un servizio viene impostato dal backend (es. 'pending').
-                             Se vuoi permettere all'utente di selezionare uno stato iniziale, decommenta questo blocco.
-                        <div class="mt-4">
-                            <x-input-label for="status" :value="__('Stato del Servizio')" />
-                            <select id="status" name="status" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>In attesa</option>
-                                <option value="scheduled" {{ old('status') == 'scheduled' ? 'selected' : '' }}>Programmato</option>
-                                <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completato</option>
-                                <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Annullato</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('status')" class="mt-2" />
-                        </div>
-                        --}}
+                        {{-- Campo Stato (Status) - Commentato per ora. --}}
 
                         <div class="flex items-center justify-end mt-4">
                             <x-primary-button>
