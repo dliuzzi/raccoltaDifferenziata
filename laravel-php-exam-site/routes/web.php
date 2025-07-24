@@ -3,13 +3,16 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\PageContentController;
-// Rimuovi o commenta la riga per HomeController se non lo usi più altrove
-// use App\Http\Controllers\HomeController;
-use App\Http\Controllers\WelcomeController; // AGGIUNGI questa riga per importare il nuovo controller
+use App\Http\Controllers\RewardRequestController; // <-- Importa il RewardRequestController
+use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticleController;
 
+// Rotta per visualizzare il singolo articolo
 Route::get('/articles/{id}', [ArticleController::class, 'show'])->name('articles.show');
+// Aggiungi anche una rotta per listare tutti gli articoli, se non l'hai già
+Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+
 
 // AGGIORNATO: La tua homepage ora punta al WelcomeController
 Route::get('/', [WelcomeController::class, 'index'])->name('homepage');
@@ -23,18 +26,22 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Route per la gestione dei servizi (puoi anche usare Route::resource('services', ServiceController::class); per concisione)
-    Route::get('/services', [ServiceController::class, 'index'])->name('services.index'); // Mostra tutti i servizi
-    Route::get('/services/create', [ServiceController::class, 'create'])->name('services.create'); // Mostra il form per creare un servizio
-    Route::post('/services', [ServiceController::class, 'store'])->name('services.store'); // Salva un nuovo servizio
-    Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show'); // Mostra i dettagli di un servizio
-    Route::get('/services/{service}/edit', [ServiceController::class, 'edit'])->name('services.edit'); // Mostra il form per modificare un servizio
-    Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update'); // Aggiorna un servizio esistente
-    Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy'); // Elimina un servizio
+    // ROTTE PER I SERVIZI DI RITIRO RIFIUTI (gestiti da ServiceController)
+    // Ho raggruppato queste rotte resource-like in una singola riga per concisione
+    Route::resource('services', ServiceController::class);
 
+    // ROTTE PER LE RICHIESTE DI PREMI (gestite da RewardRequestController)
+    // Questo crea automaticamente reward_requests.index, .create, .store, .show, .edit, .update, .destroy
+    Route::resource('reward_requests', RewardRequestController::class); // <-- AGGIUNTO QUI: ROTTE RESOURCE PER I PREMI
+
+    // Rotta specifica per il form di creazione dei Premi Ecologici (Card 3)
+    // Questa rotta mantiene il nome 'services.premi.create' ma punta al RewardRequestController
+    Route::get('/services/premi/create', [RewardRequestController::class, 'create'])->name('services.premi.create'); // <-- CORRETTO IL CONTROLLER
+
+    // Rotte per le pagine di contenuto statico
     Route::get('/raccolta-differenziata', [PageContentController::class, 'raccoltaDifferenziata'])->name('raccolta-differenziata');
     Route::get('/ingombranti', [PageContentController::class, 'ingombranti'])->name('ingombranti');
-    Route::get('/porta-a-porta', [PageContentController::class, 'portaAPorta'])->name('porta-a-porta'); // <-- CAMBIA QUESTO: 'porta-a-porta' (URL) ma 'portaAPorta' (metodo)
+    Route::get('/porta-a-porta', [PageContentController::class, 'portaAPorta'])->name('porta-a-porta');
 });
 
 require __DIR__.'/auth.php';

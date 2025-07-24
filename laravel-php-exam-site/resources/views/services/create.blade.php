@@ -14,11 +14,19 @@
 
                         <div>
                             <x-input-label for="service_type" :value="__('Tipo di Servizio')" />
-                            {{-- MODIFICA QUI: Aggiunto l'attributo value per pre-popolare il campo --}}
+                            {{-- Campo service_type: readonly se pre-selezionato --}}
                             <x-text-input id="service_type" class="block mt-1 w-full" type="text" name="service_type"
-                                :value="old('service_type', $preselectedServiceType ?? '')" required autofocus />
+                                :value="old('service_type', $preselectedServiceType ?? '')"
+                                @if(isset($preselectedServiceType) && !empty($preselectedServiceType)) readonly @endif
+                                required autofocus />
                             <x-input-error :messages="$errors->get('service_type')" class="mt-2" />
                         </div>
+
+                        {{-- Campo nascosto per service_id --}}
+                        {{-- Questo campo invierà il service_id numerico --}}
+                        <input type="hidden" name="service_id" value="{{ old('service_id', $preselectedServiceId ?? '') }}">
+                        <x-input-error :messages="$errors->get('service_id')" class="mt-2" />
+
 
                         <div class="mt-4">
                             <x-input-label for="description" :value="__('Descrizione (Dettagli aggiuntivi)')" />
@@ -31,8 +39,6 @@
                             <x-text-input id="scheduled_at" class="block mt-1 w-full" type="datetime-local" name="scheduled_at" :value="old('scheduled_at')" />
                             <x-input-error :messages="$errors->get('scheduled_at')" class="mt-2" />
                         </div>
-
-                        {{-- Campo Stato (Status) - Commentato per ora. --}}
 
                         <div class="flex items-center justify-end mt-4">
                             <x-primary-button>

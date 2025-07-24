@@ -25,7 +25,7 @@
                         <div class="text-center mt-auto flex-shrink-0">
                             {{-- MODIFICA QUI: Aggiunto ?type=regolare --}}
                             <a href="{{ route('services.create', ['type' => 'regolare']) }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
-                                Dettagli Ritiro
+                                Richiesta ritiro regolare
                             </a>
                         </div>
                     </div>
@@ -42,7 +42,7 @@
                         <div class="text-center mt-auto flex-shrink-0">
                             {{-- MODIFICA QUI: Aggiunto ?type=occasionale --}}
                             <a href="{{ route('services.create', ['type' => 'occasionale']) }}" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
-                                Richiedi Ritiro
+                                Richiesta ritiro Ingombranti
                             </a>
                         </div>
                     </div>
@@ -57,9 +57,9 @@
                             Premia la tua scelta sostenibile! Scopri come accumulare punti con la raccolta differenziata e riscattare fantastiche premi.
                         </div>
                         <div class="text-center mt-auto flex-shrink-0">
-                            {{-- MODIFICA QUI: Aggiunto ?type=premi --}}
-                            <a href="{{ route('services.create', ['type' => 'premi']) }}" class="inline-block bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
-                                Scopri i Premi
+                            {{-- MODIFICA QUI: Punta a una nuova rotta per il form dei premi --}}
+                            <a href="{{ route('services.premi.create') }}" class="inline-block bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
+                                Richiedi Premi Ecologici
                             </a>
                         </div>
                     </div>
