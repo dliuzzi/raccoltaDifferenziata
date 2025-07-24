@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Richiedi Nuovo Servizio di Raccolta') }}
         </h2>
     </x-slot>
@@ -9,24 +9,33 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    {{-- Mostra errori di validazione --}}
+                    @if ($errors->any())
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                            <ul class="list-disc pl-5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    <div class="mb-2 text-xs text-blue-700">DEBUG: service_id = {{ $preselectedServiceId }}</div>
                     <form method="POST" action="{{ route('services.store') }}">
                         @csrf
 
                         <div>
-                            <x-input-label for="service_type" :value="__('Tipo di Servizio')" />
-                            {{-- Campo service_type: readonly se pre-selezionato --}}
-                            <x-text-input id="service_type" class="block mt-1 w-full" type="text" name="service_type"
-                                :value="old('service_type', $preselectedServiceType ?? '')"
-                                @if(isset($preselectedServiceType) && !empty($preselectedServiceType)) readonly @endif
-                                required autofocus />
-                            <x-input-error :messages="$errors->get('service_type')" class="mt-2" />
+                            <x-input-label for="service_type_display" :value="__('Tipo di Servizio')" />
+                            {{-- CAMPO DI TESTO NON MODIFICABILE PER VISUALIZZARE IL TIPO DI SERVIZIO --}}
+                            <x-text-input id="service_type_display" class="block mt-1 w-full" type="text"
+                                value="{{ $preselectedServiceType }}" readonly />
+                            {{-- Questo campo non è inviato con il form, è solo per visualizzazione --}}
                         </div>
 
-                        {{-- Campo nascosto per service_id --}}
-                        {{-- Questo campo invierà il service_id numerico --}}
-                        <input type="hidden" name="service_id" value="{{ old('service_id', $preselectedServiceId ?? '') }}">
-                        <x-input-error :messages="$errors->get('service_id')" class="mt-2" />
+                        {{-- CAMPO NASCOSTO AGGIUNTO PER SERVICE_TYPE: QUESTO SARÀ INVIATO AL CONTROLLER --}}
+                        <input type="hidden" name="service_type" value="{{ $preselectedServiceType }}">
 
+                        {{-- Campo nascosto per service_id --}}
+                        <input type="hidden" name="service_id" value="{{ $preselectedServiceId }}">
 
                         <div class="mt-4">
                             <x-input-label for="description" :value="__('Descrizione (Dettagli aggiuntivi)')" />
@@ -35,8 +44,12 @@
                         </div>
 
                         <div class="mt-4">
-                            <x-input-label for="scheduled_at" :value="__('Data e Ora Programmate (Opzionale)')" />
-                            <x-text-input id="scheduled_at" class="block mt-1 w-full" type="datetime-local" name="scheduled_at" :value="old('scheduled_at')" />
+                            <x-input-label for="scheduled_at" :value="__('Data e Ora Programmate')" />
+                            <x-text-input id="scheduled_at" class="block mt-1 w-full" type="datetime-local" name="scheduled_at"
+                                value="{{ $preselectedScheduledAt }}"
+                                readonly
+                                required
+                            />
                             <x-input-error :messages="$errors->get('scheduled_at')" class="mt-2" />
                         </div>
 

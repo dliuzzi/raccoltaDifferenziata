@@ -6,6 +6,7 @@ use App\Models\RewardRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 
 class RewardRequestController extends Controller
 {
@@ -35,13 +36,15 @@ class RewardRequestController extends Controller
     /**
      * Show the form for creating a new reward request.
      */
-    public function create()
+    public function create(Request $request)
     {
         $userPoints = Auth::user()->points;
-        // Passa solo le chiavi (i nomi dei premi) alla vista per il dropdown
         $displayOptions = array_keys($this->rewardCosts);
-
-        return view('services.premi.create', compact('userPoints', 'displayOptions'));
+        $rewardCosts = $this->rewardCosts;
+        $preselectedServiceType = $request->query('service_type', '');
+        $preselectedServiceId = $request->query('service_id', '');
+        $preselectedScheduledAt = $request->query('scheduled_at', Carbon::now()->format('Y-m-d\TH:i'));
+        return view('services.premi.create', compact('userPoints', 'displayOptions', 'rewardCosts', 'preselectedServiceType', 'preselectedServiceId', 'preselectedScheduledAt'));
     }
 
     /**
@@ -87,9 +90,11 @@ class RewardRequestController extends Controller
             'scheduled_at' => $validatedData['scheduled_at'],
             'status' => 'in attesa', // Stato iniziale
             'points_redeemed' => $pointsToRedeem, // Salva i punti effettivi riscattati
+            'service_type' => $request->input('service_type'),
+            'service_id' => $request->input('service_id'),
         ]);
 
-        return redirect()->route('reward_requests.index')->with('success', 'Richiesta premio inviata con successo!');
+        return view('services.premi.success');
     }
 
     /**

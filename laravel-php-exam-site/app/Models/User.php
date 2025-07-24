@@ -62,6 +62,11 @@ class User extends Authenticatable // Se usi MustVerifyEmail, lascialo implement
         return $this->hasMany(RewardRequest::class);
     }
 
+    public function services()
+    {
+        return $this->hasMany(\App\Models\Service::class);
+    }
+
     // Puoi anche mantenere un metodo 'services' che restituisce una collezione unita
     // di entrambi i tipi di servizi, utile se vuoi un'unica lista per la dashboard.
     // Tieni presente che questo carica tutti i dati in memoria e li unisce in PHP.

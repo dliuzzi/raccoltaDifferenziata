@@ -29,8 +29,8 @@ class Service extends Model
         'kilograms_collected' => 'integer', // <-- AGGIUNTO QUI per il casting
     ];
 
-    public function user(): BelongsTo // Tipo di ritorno per chiarezza
+    public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(\App\Models\User::class);
     }
 }

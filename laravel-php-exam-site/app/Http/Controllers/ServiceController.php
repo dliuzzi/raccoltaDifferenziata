@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Service; // Questo modello Service ora si riferisce ai ritiri rifiuti
+use App\Models\Service; // Assicurati che questo sia il modello corretto per i servizi di raccolta
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User; // Importa il modello User per aggiornare i punti
+use Carbon\Carbon; // Necessario per Carbon::now()
 
 class ServiceController extends Controller
 {
@@ -14,41 +14,28 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        // Recupera solo i servizi di ritiro rifiuti dell'utente autenticato
-        // NOTA: Usiamo la nuova relazione 'wasteCollectionServices()' definita nel modello User
-        $services = Auth::user()->wasteCollectionServices()->latest()->get();
+        // Recupera solo i servizi dell'utente autenticato
+        // Assicurati che il modello User abbia la relazione 'services()' definita come hasMany(Service::class)
+        $services = Auth::user()->services()->latest()->get();
         return view('services.index', compact('services'));
     }
 
     /**
      * Show the form for creating a new waste collection service.
      */
-    public function create(Request $request)
+    public function create(Request $request) // Abbiamo bisogno di Request qui per i parametri della query
     {
-        $preselectedServiceType = '';
-        $preselectedServiceId = null;
+        // Recupera i parametri pre-selezionati dall'URL (dal bottone cliccato)
+        $preselectedServiceType = $request->query('service_type', '');
+        $preselectedServiceId = $request->query('service_id');
 
-        // Leggi il parametro 'type' dall'URL
-        $type = $request->query('type');
+        // Genera la data e ora attuali per il campo scheduled_at
+        // Formatta per l'input type="datetime-local" (YYYY-MM-DDTHH:MM)
+        // Se non c'è un valore pre-selezionato, usa l'ora attuale
+        $preselectedScheduledAt = Carbon::now()->format('Y-m-d\TH:i');
 
-        // Imposta il valore predefinito in base al parametro 'type'
-        switch ($type) {
-            case 'regolare':
-                $preselectedServiceType = 'Ritiro regolare dei rifiuti';
-                $preselectedServiceId = 0; // Mappa al service_id 0
-                break;
-            case 'occasionale':
-                $preselectedServiceType = 'Ritiro occasionale di rifiuti e ingombranti';
-                $preselectedServiceId = 1; // Mappa al service_id 1
-                break;
-            // IL CASO 'premi' È STATO RIMOSSO DA QUI, ora è gestito dal RewardRequestController
-            default:
-                $preselectedServiceType = '';
-                $preselectedServiceId = null;
-                break;
-        }
-
-        return view('services.create', compact('preselectedServiceType', 'preselectedServiceId'));
+        // Passa queste variabili alla vista
+        return view('services.create', compact('preselectedServiceType', 'preselectedServiceId', 'preselectedScheduledAt'));
     }
 
     /**
@@ -57,43 +44,46 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         // Validazione dei dati in ingresso
-        $request->validate([
+        // Ho aggiunto 'service_id' alla validazione, essenziale perché viene inviato
+        // e 'scheduled_at' come required
+        $validatedData = $request->validate([
+            // 'service_type' è richiesto dal form (campo hidden)
             'service_type' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'scheduled_at' => 'nullable|date',
-            'service_id' => 'required|integer|min:0|max:1', // service_id ora solo 0 o 1
-            // LA VALIDAZIONE PER 'reward_type' È STATA RIMOSSA QUI
+            // 'scheduled_at' dovrebbe essere sempre presente e una data valida
+            'scheduled_at' => 'required|date',
+            // 'status' viene impostato a 'in attesa' nel controller, non dal form
+            // 'status' => 'nullable|string|max:255', // Rimosso se non vuoi venga dal form
+            
+            // service_id è l'ID del tipo di servizio (es. 1, 2)
+            // Assicurati che 'services' nel `exists` sia la tabella corretta
+            // che contiene gli ID dei tipi di servizio. Spesso è una tabella 'service_types'.
+            'service_id' => 'required|integer', // RIMOSSA LA VALIDAZIONE exists
         ]);
 
-        // Prepara i dati per la creazione
-        // Lo stato è 'in corso' come richiesto
-        $dataToCreate = array_merge($request->all(), ['status' => 'in corso']);
+        // Crea un nuovo servizio associandolo all'utente autenticato
+        // Qui mappiamo i campi del form ai campi della tabella 'services'
+        Auth::user()->services()->create([
+            'service_type' => $validatedData['service_type'],
+            'description' => $validatedData['description'],
+            'scheduled_at' => $validatedData['scheduled_at'],
+            'status' => 'in attesa', // Imposta uno stato iniziale fisso
+            'service_id' => $validatedData['service_id'], // Usa l'ID passato dal form
+            // Nota: Se nel tuo modello 'Service' la colonna per l'ID del tipo di servizio
+            // si chiama 'service_type_id', dovrai mapparla qui: 'service_type_id' => $validatedData['service_id']
+            // oppure cambiare il 'name' dell'input hidden nel form a 'service_type_id'.
+            // Per ora, seguo la tua struttura di avere 'service_id' direttamente nella tabella Service.
+        ]);
 
-        // Logica per assegnare 'service_id' basandosi su 'service_type' (utile come fallback)
-        if (!isset($dataToCreate['service_id']) || is_null($dataToCreate['service_id'])) {
-             switch ($dataToCreate['service_type']) {
-                case 'Ritiro regolare dei rifiuti':
-                    $dataToCreate['service_id'] = 0;
-                    break;
-                case 'Ritiro occasionale di rifiuti e ingombranti':
-                    $dataToCreate['service_id'] = 1;
-                    break;
-                // LA LOGICA PER 'Richiesta premi ecologici' È STATA RIMOSSA QUI
-            }
-        }
-
-        // NOTA: Usiamo la nuova relazione 'wasteCollectionServices()' definita nel modello User
-        Auth::user()->wasteCollectionServices()->create($dataToCreate);
-
-        return redirect()->route('services.index')->with('success', 'Servizio di ritiro rifiuti richiesto con successo!');
+        return redirect()->route('services.index')->with('success', 'Servizio richiesto con successo!');
     }
 
     /**
-     * Display the specified waste collection service.
+     * Display the specified resource.
      */
     public function show(Service $service)
     {
-        // Assicurati che l'utente possa vedere solo i propri servizi di ritiro
+        // Assicurati che l'utente possa vedere solo i propri servizi
         if (Auth::id() !== $service->user_id) {
             abort(403, 'Unauthorized action.');
         }
@@ -101,11 +91,11 @@ class ServiceController extends Controller
     }
 
     /**
-     * Show the form for editing the specified waste collection service.
+     * Show the form for editing the specified resource.
      */
     public function edit(Service $service)
     {
-        // Assicurati che l'utente possa modificare solo i propri servizi di ritiro
+        // Assicurati che l'utente possa modificare solo i propri servizi
         if (Auth::id() !== $service->user_id) {
             abort(403, 'Unauthorized action.');
         }
@@ -113,59 +103,45 @@ class ServiceController extends Controller
     }
 
     /**
-     * Update the specified waste collection service in storage.
+     * Update the specified resource in storage.
      */
     public function update(Request $request, Service $service)
     {
-        // Assicurati che l'utente possa aggiornare solo i propri servizi di ritiro
+        // Assicurati che l'utente possa aggiornare solo i propri servizi
         if (Auth::id() !== $service->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
-        $validatedData = $request->validate([
+        $request->validate([
             'service_type' => 'required|string|max:255',
             'description' => 'nullable|string',
             'scheduled_at' => 'nullable|date',
-            'status' => 'required|string|max:255',
-            'service_id' => 'required|integer|min:0|max:1', // service_id ora solo 0 o 1
-            // Aggiungi la validazione per i kg raccolti. Questo campo sarà inserito dall'admin.
-            'kilograms_collected' => 'nullable|integer|min:0',
+            'status' => 'nullable|string|max:255',
+            // Aggiungi 'service_id' anche qui se lo aggiorni o lo validi
+            'service_id' => 'required|integer|exists:services,id',
+            // 'kilograms_collected' => 'nullable|integer|min:0', // Rimosso se non gestisci i premi qui
         ]);
 
-        // --- LOGICA PER L'ASSEGNAZIONE DEI PUNTI ---
-        // Controlla se lo stato è cambiato in 'risolto'
-        // E se il servizio era precedentemente in uno stato diverso da 'risolto'
-        // E se si tratta di un servizio di ritiro (service_id 0 o 1)
-        if ($service->status !== 'risolto' && $validatedData['status'] === 'risolto' && ($service->service_id === 0 || $service->service_id === 1)) {
-            $kilograms = $validatedData['kilograms_collected'] ?? 0; // Prendi i kg dall'input, default 0 se non forniti
-            $pointsEarned = floor($kilograms / 10); // Esempio: 1 punto ogni 10 kg
+        // Non c'è logica per i punti/premi qui, in base alla tua richiesta.
+        // Se in futuro vuoi aggiungere la logica per i punti, dovrai ripristinarla.
 
-            $user = $service->user; // Recupera l'utente associato a questo servizio
-            $user->points += $pointsEarned; // Aggiungi i punti
-            $user->save(); // Salva il nuovo saldo punti dell'utente
-        }
-        // --- FINE LOGICA PUNTI ---
+        $service->update($request->all());
 
-        $service->update($validatedData); // Aggiorna il servizio con i dati validati
-
-        return redirect()->route('services.index')->with('success', 'Servizio di ritiro rifiuti aggiornato con successo!');
+        return redirect()->route('services.index')->with('success', 'Servizio aggiornato con successo!');
     }
 
     /**
-     * Remove the specified waste collection service from storage.
+     * Remove the specified resource from storage.
      */
     public function destroy(Service $service)
     {
-        // Assicurati che l'utente possa eliminare solo i propri servizi di ritiro
+        // Assicurati che l'utente possa eliminare solo i propri servizi
         if (Auth::id() !== $service->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
         $service->delete();
 
-        return redirect()->route('services.index')->with('success', 'Servizio di ritiro rifiuti eliminato con successo!');
+        return redirect()->route('services.index')->with('success', 'Servizio eliminato con successo!');
     }
-
-    // IL METODO public function createPremi() È STATO COMPLETAMENTE RIMOSSO DA QUESTO CONTROLLER.
-    // Ora è gestito nel RewardRequestController.
 }

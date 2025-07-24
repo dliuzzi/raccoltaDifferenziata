@@ -122,7 +122,7 @@
                                 <img src="{{ asset('images/storage/' . $latestArticle->image) }}" alt="{{ $latestArticle->title }}" class="w-full h-full object-cover">
                             @else
                                 {{-- Percorso per l'immagine di default --}}
-                                <img src="{{ asset('images/default-article.jpg') }}" alt="Immagine di default per l'articolo" class="w-full h-full object-cover">
+                                <img src="{{ asset('images/default-article.jpg') }}" alt="" class="w-full h-full object-cover">
                             @endif
                         </div>
                         <div class="p-6 md:w-2/3 flex-grow">
