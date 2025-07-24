@@ -38,14 +38,14 @@ Piattaforma web per incentivare la raccolta differenziata tramite sistema di pun
 ## Tecnologie
 PHP, Laravel, MySQL, HTML/CSS/JavaScript
 
-## 2. PROGETTARE LA STRUTTURA DEI DATI
+## PROGETTARE LA STRUTTURA DEI DATI
 
 ### DIAGRAMMA E/R
 
 Il nostro database si forma sulla base di 3 entità: Utenti, Servizi e Azienda di smaltimento.
 
 
-## 2.1 Entità e le loro variabili:
+## 1 - Entità e le loro variabili:
 
 
 ### Utenti
@@ -93,13 +93,13 @@ Entità: Smaltimento
  Zona_di_raccolta (varchar)
 
 
-## 2.2 Business rules
+## 2 - Business rules
 
 Un utente può richiedere più servizi, e ogni servizio può essere richiesto da più utenti (relazione molti a molti).
 Ogni servizio è associato a un solo smaltimento, ma uno smaltimento può essere associato a più servizi (relazione molti a uno).
 
 
-## 3. Flussi utente
+## 3 - Flussi utente
 
 Il diagramma UML raffigura la comunicazione tra client e server, in particolare nelle fasi di accesso, richiesta di servizi, e gestione degli utenti. Di seguito viene spiegato il funzionamento passo per passo.
 
@@ -141,7 +141,7 @@ L’utente può decidere di effettuare il logout, chiudendo la sessione.
 client logout → gestione utenti
 
 
-## 4. Flowchart
+## 4 - Flowchart
 Algoritmo di Autenticazione e Accesso
 
 L’algoritmo gestisce il login, la generazione del token, il caricamento dei servizi utente e la visualizzazione del form di profilo.
